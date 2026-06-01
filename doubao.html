@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>循迹 - 豆包跑步分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 32px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .header p {
+            opacity: 0.9;
+        }
+        .content {
+            padding: 32px;
+        }
+        .config-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .config-box label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        .config-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        .config-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+        }
+        .upload-area {
+            border: 3px dashed #dee2e6;
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 24px;
+        }
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #667eea10;
+        }
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .upload-text {
+            color: #6c757d;
+            font-size: 16px;
+        }
+        #preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .result-box {
+            margin-top: 24px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            display: none;
+        }
+        .result-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: #495057;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .result-content {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: #212529;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e9ecef;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃 循迹 - 豆包跑步分析</h1>
+            <p>上传运动手表截图，豆包帮你分析</p>
+        </div>
+        <div class="content">
+            <div class="config-box">
+                <label for="apiKey">火山引擎 API Key</label>
+                <input type="password" id="apiKey" placeholder="请输入你的火山引擎 API Key">
+            </div>
+
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击或拖拽上传运动截图</div>
+            </div>
+            <input type="file" id="fileInput" accept="image/*">
+
+            <img id="preview">
+
+            <button class="btn" id="analyzeBtn" disabled>🚀 开始分析</button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>豆包正在分析中...</div>
+            </div>
+
+            <div class="result-box" id="result">
+                <div class="result-title">✨ 分析结果</div>
+                <div class="result-content" id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKeyInput = document.getElementById('apiKey');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const resultContent = document.getElementById('resultContent');
+        const uploadArea = document.querySelector('.upload-area');
+
+        let currentImage = null;
+
+        // 拖拽支持
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = e.target.result;
+                preview.src = currentImage;
+                preview.style.display = 'block';
+                analyzeBtn.disabled = !apiKeyInput.value.trim();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        apiKeyInput.addEventListener('input', () => {
+            analyzeBtn.disabled = !apiKeyInput.value.trim() || !currentImage;
+        });
+
+        analyzeBtn.addEventListener('click', async () => {
+            if (!currentImage || !apiKeyInput.value.trim()) return;
+
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            try {
+                const base64Data = currentImage.split(',')[1];
+                const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKeyInput.value.trim()}`
+                    },
+                    body: JSON.stringify({
+                        model: 'ep-20250601110043-g4t7v', // 这里用户需要换成自己的豆包模型ID
+                        messages: [
+                            {
+                                role: 'user',
+                                content: [
+                                    {
+                                        type: 'image_url',
+                                        image_url: { url: `data:image/jpeg;base64,${base64Data}` }
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '这是一张运动手表跑步截图，请帮我：1. 提取所有数据（日期、距离、时长、平均心率、配速、卡路里等）2. 给出跑步效果点评和建议'
+                                    }
+                                ]
+                            }
+                        ],
+                        max_tokens: 2048
+                    })
+                });
+
+                const data = await response.json();
+                if (data.choices && data.choices[0]) {
+                    resultContent.textContent = data.choices[0].message.content;
+                    result.style.display = 'block';
+                } else {
+                    throw new Error(data.error?.message || '请求失败');
+                }
+            } catch (err) {
+                alert('出错了：' + err.message);
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
