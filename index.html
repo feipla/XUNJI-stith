@@ -1055,6 +1055,15 @@
             </circle>
           </svg>
         </div>
+<<<<<<< HEAD
+        <div class="icon-btn" onclick="navigateTo('doubao-config')" style="color: var(--primary);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path>
+            <path d="M12 6a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z"></path>
+          </svg>
+        </div>
+=======
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         <div class="icon-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -1631,6 +1640,47 @@
       </div>
     </div>
     
+<<<<<<< HEAD
+    <div id="doubaoConfigPage" class="page">
+      <div class="detail-header">
+        <div class="back-btn" onclick="navigateTo('home')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"></path>
+          </svg>
+        </div>
+      </div>
+      <h1 class="font-display text-2xl font-semibold mb-6" style="color: var(--on-surface);">豆包配置</h1>
+      
+      <div class="glass-card" style="margin-bottom: 24px;">
+        <p class="text-sm mb-4" style="color: var(--on-surface-variant);">
+          1. 打开 <a href="https://console.volcengine.com/ark/region:ark+cn-beijing/key" target="_blank" style="color: var(--primary);">火山引擎 ARK</a>
+        </p>
+        <p class="text-sm mb-4" style="color: var(--on-surface-variant);">
+          2. 创建 API Key 和豆包视觉模型接入点
+        </p>
+      </div>
+      
+      <div class="surface-card" style="padding: 20px; margin-bottom: 16px;">
+        <label class="menu-title" style="display: block; margin-bottom: 8px;">API Key</label>
+        <input type="password" id="doubaoApiKeyInput" class="w-full px-4 py-3 rounded-lg" 
+          style="background: var(--surface-container); border: 1px solid var(--surface-container-high); color: var(--on-surface); font-size: 14px;"
+          placeholder="输入你的火山引擎 API Key">
+      </div>
+      
+      <div class="surface-card" style="padding: 20px; margin-bottom: 24px;">
+        <label class="menu-title" style="display: block; margin-bottom: 8px;">模型 ID (Endpoint ID)</label>
+        <input type="text" id="doubaoModelIdInput" class="w-full px-4 py-3 rounded-lg" 
+          style="background: var(--surface-container); border: 1px solid var(--surface-container-high); color: var(--on-surface); font-size: 14px;"
+          placeholder="ep-xxxxx">
+      </div>
+      
+      <button class="btn-primary" onclick="saveDoubaoConfig()">
+        保存配置
+      </button>
+    </div>
+    
+=======
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
     <nav class="bottom-nav">
       <div class="nav-item active" onclick="switchTab('home')">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1715,9 +1765,30 @@
           document.getElementById('mainHeader').style.display = 'flex';
           navItems[4].classList.add('active');
           break;
+<<<<<<< HEAD
+        case 'doubao-config':
+          document.getElementById('doubaoConfigPage').classList.add('active');
+          document.getElementById('mainHeader').style.display = 'flex';
+          document.getElementById('doubaoApiKeyInput').value = DOUBAO_API_KEY;
+          document.getElementById('doubaoModelIdInput').value = DOUBAO_MODEL_ID;
+          break;
       }
     }
     
+    function saveDoubaoConfig() {
+      DOUBAO_API_KEY = document.getElementById('doubaoApiKeyInput').value.trim();
+      DOUBAO_MODEL_ID = document.getElementById('doubaoModelIdInput').value.trim();
+      localStorage.setItem('doubao_api_key', DOUBAO_API_KEY);
+      localStorage.setItem('doubao_model_id', DOUBAO_MODEL_ID);
+      alert('配置已保存！');
+      navigateTo('home');
+    }
+    
+=======
+      }
+    }
+    
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
     function switchTab(tab) {
       navigateTo(tab);
     }
@@ -1827,6 +1898,12 @@
       "路在脚下，也在心里。"
     ];
     
+<<<<<<< HEAD
+    // ===== API 配置：豆包视觉多模态 =====
+    let DOUBAO_API_KEY = localStorage.getItem('doubao_api_key') || 'ark-b6558bd8-84ba-4c56-a83c-3807b78e7c91-454a5';
+    let DOUBAO_MODEL_ID = localStorage.getItem('doubao_model_id') || 'Doubao-1.5-vision-pro';
+    const DOUBAO_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+=======
     // ===== API 配置：百度OCR(通用文字识别) + DeepSeek 三阶段流水线 =====
 
     // ===== 百度OCR配置 =====
@@ -1841,6 +1918,7 @@
       maxTokens: 2000,
       temperature: 0.7
     };
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
     
     // ===== Prompt 1: DeepSeek 结构化数据提取（17字段） =====
 
@@ -2202,12 +2280,125 @@
       });
     }
 
+<<<<<<< HEAD
+    // ===== 主流程：豆包视觉多模态分析 =====
+=======
     // ===== 主流程：三阶段流水线（替代原来的callKimiAPI） =====
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
 
     async function analyzeActivityWithPipeline(imageBase64) {
       const startTime = Date.now();
 
       try {
+<<<<<<< HEAD
+        if (!DOUBAO_API_KEY || !DOUBAO_MODEL_ID) {
+          alert('请先配置豆包 API Key 和模型 ID！');
+          navigateTo('doubao-config');
+          throw new Error('未配置豆包 API');
+        }
+
+        updateProgress(10);
+
+        const base64Data = imageBase64.split(',')[1];
+        
+        const prompt = `你是一位专业的跑步运动教练和数据分析专家。请分析这张运动手表截图，提取数据并给出分析。
+
+请按以下 JSON 格式返回（只返回 JSON，不要有其他文字）：
+{
+  "valid": true,
+  "data": {
+    "date": "日期（格式：YYYY-MM-DD）",
+    "type": "运动类型（跑步/骑行/游泳等）",
+    "distance": 距离（公里，数字）,
+    "duration": 时长（分钟，数字）,
+    "pace": 平均配速（分钟/公里，数字）,
+    "avgHR": 平均心率（bpm，数字）,
+    "maxHR": 最高心率（bpm，数字）,
+    "calories": 卡路里（kcal，数字）,
+    "vo2max": 最大摄氧量（ml/kg/min，数字或null）,
+    "recoveryHR": 恢复心率（bpm，数字或null）,
+    "bestPace": 最佳配速（分钟/公里，数字或null）,
+    "avgSpeed": 平均速度（km/h，数字或null）,
+    "elevationGain": 爬升高度（米，数字或null）,
+    "cadence": 步频（spm，数字或null）,
+    "avgStride": 平均步幅（米，数字或null）
+  },
+  "analysis": {
+    "status": "状态描述（如：状态良好/强度适中/疲劳等）",
+    "main": "主要分析结论",
+    "detail1": "分析详情1（关于配速/心率）",
+    "detail2": "分析详情2（关于体能/建议）"
+  },
+  "suggestion": {
+    "nextTraining": "下次训练建议",
+    "recoveryAdvice": "恢复建议",
+    "longTermDirection": "长期方向"
+  },
+  "recoveryTime": 24
+}`;
+
+        const response = await fetch(DOUBAO_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + DOUBAO_API_KEY
+          },
+          body: JSON.stringify({
+            model: DOUBAO_MODEL_ID,
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: prompt },
+                  {
+                    type: 'image_url',
+                    image_url: { url: 'data:image/jpeg;base64,' + base64Data }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 2048,
+            temperature: 0.7
+          })
+        });
+
+        updateProgress(60);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error('豆包 API 错误: ' + errorText);
+        }
+
+        const data = await response.json();
+        let resultJson;
+        
+        const content = data.choices?.[0]?.message?.content || '';
+        
+        try {
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            resultJson = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error('未找到 JSON 数据');
+          }
+        } catch (e) {
+          console.error('解析失败，原始内容:', content);
+          throw new Error('无法解析豆包返回结果');
+        }
+
+        updateProgress(90);
+
+        const structuredData = resultJson.data || {};
+        const commentary = {
+          status: resultJson.analysis?.status || '状态良好',
+          analysis: resultJson.analysis || { main: '', detail1: '', detail2: '' },
+          suggestion: resultJson.suggestion || {},
+          recoveryTime: resultJson.recoveryTime || 24
+        };
+
+        const now = new Date();
+
+=======
         // 阶段0: 压缩图片（OCR限制1.5MB）
         const compressedImage = await compressImageForOCR(imageBase64);
 
@@ -2223,6 +2414,7 @@
         const now = new Date();
 
         // 组装为UI期望的嵌套结构
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         const finalResult = {
           id: now.getTime(),
           date: structuredData.date || now.toLocaleDateString('zh-CN'),
@@ -2250,7 +2442,11 @@
             avgStride: structuredData.avgStride || null
           },
 
+<<<<<<< HEAD
+          hrZones: generateHRZones(structuredData.duration || 45),
+=======
           hrZones: commentary.hrZones || generateHRZones(structuredData.duration || 45),
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
           recoveryTime: parseInt(commentary.recoveryTime) || 24,
 
           aiAnalysis: {
@@ -2267,14 +2463,22 @@
           processingTime: Math.round((Date.now() - startTime) / 1000)
         };
 
+<<<<<<< HEAD
+        console.log('✅ 豆包分析完成，总耗时:', finalResult.processingTime, '秒');
+=======
         console.log('✅ 三阶段流水线完成，总耗时:', finalResult.processingTime, '秒');
 
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         updateProgress(100);
 
         return finalResult;
 
       } catch (error) {
+<<<<<<< HEAD
+        console.error('❌ 豆包分析失败:', error);
+=======
         console.error('❌ 流水线处理失败:', error);
+>>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         throw error;
       }
     }
