@@ -1055,15 +1055,12 @@
             </circle>
           </svg>
         </div>
-<<<<<<< HEAD
         <div class="icon-btn" onclick="navigateTo('doubao-config')" style="color: var(--primary);">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path>
             <path d="M12 6a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z"></path>
           </svg>
         </div>
-=======
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         <div class="icon-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -1640,7 +1637,6 @@
       </div>
     </div>
     
-<<<<<<< HEAD
     <div id="doubaoConfigPage" class="page">
       <div class="detail-header">
         <div class="back-btn" onclick="navigateTo('home')">
@@ -1679,8 +1675,6 @@
       </button>
     </div>
     
-=======
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
     <nav class="bottom-nav">
       <div class="nav-item active" onclick="switchTab('home')">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1892,27 +1886,10 @@
       "路在脚下，也在心里。"
     ];
     
-<<<<<<< HEAD
     // ===== API 配置：豆包视觉多模态 =====
     let DOUBAO_API_KEY = localStorage.getItem('doubao_api_key') || 'ark-b6558bd8-84ba-4c56-a83c-3807b78e7c91-454a5';
     let DOUBAO_MODEL_ID = localStorage.getItem('doubao_model_id') || 'Doubao-1.5-vision-pro';
     const DOUBAO_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
-=======
-    // ===== API 配置：百度OCR(通用文字识别) + DeepSeek 三阶段流水线 =====
-
-    // ===== 百度OCR配置 =====
-    const BAIDU_OCR_CONFIG = {
-      proxyUrl: '/api/ocr'
-    };
-
-    const DEEPSEEK_CONFIG = {
-      apiKey: 'sk-c75dfa345afe4ffea560c05e796330ed',
-      apiUrl: 'https://api.deepseek.com/v1/chat/completions',
-      model: 'deepseek-chat',
-      maxTokens: 2000,
-      temperature: 0.7
-    };
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
     
     // ===== Prompt 1: DeepSeek 结构化数据提取（17字段） =====
 
@@ -2273,18 +2250,13 @@
         img.src = base64Image;
       });
     }
-
-<<<<<<< HEAD
+    
     // ===== 主流程：豆包视觉多模态分析 =====
-=======
-    // ===== 主流程：三阶段流水线（替代原来的callKimiAPI） =====
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
 
     async function analyzeActivityWithPipeline(imageBase64) {
       const startTime = Date.now();
 
       try {
-<<<<<<< HEAD
         if (!DOUBAO_API_KEY || !DOUBAO_MODEL_ID) {
           alert('请先配置豆包 API Key 和模型 ID！');
           navigateTo('doubao-config');
@@ -2392,23 +2364,6 @@
 
         const now = new Date();
 
-=======
-        // 阶段0: 压缩图片（OCR限制1.5MB）
-        const compressedImage = await compressImageForOCR(imageBase64);
-
-        // 阶段1: OCR文本提取
-        const ocrText = await ocrExtractImage(compressedImage);
-
-        // 阶段2: DeepSeek结构化提取
-        const structuredData = await deepseekExtractData(ocrText);
-
-        // 阶段3: DeepSeek AI评语生成
-        const commentary = await deepseekGenerateCommentary(structuredData);
-
-        const now = new Date();
-
-        // 组装为UI期望的嵌套结构
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         const finalResult = {
           id: now.getTime(),
           date: structuredData.date || now.toLocaleDateString('zh-CN'),
@@ -2436,11 +2391,7 @@
             avgStride: structuredData.avgStride || null
           },
 
-<<<<<<< HEAD
           hrZones: generateHRZones(structuredData.duration || 45),
-=======
-          hrZones: commentary.hrZones || generateHRZones(structuredData.duration || 45),
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
           recoveryTime: parseInt(commentary.recoveryTime) || 24,
 
           aiAnalysis: {
@@ -2457,22 +2408,13 @@
           processingTime: Math.round((Date.now() - startTime) / 1000)
         };
 
-<<<<<<< HEAD
         console.log('✅ 豆包分析完成，总耗时:', finalResult.processingTime, '秒');
-=======
-        console.log('✅ 三阶段流水线完成，总耗时:', finalResult.processingTime, '秒');
-
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         updateProgress(100);
 
         return finalResult;
 
       } catch (error) {
-<<<<<<< HEAD
         console.error('❌ 豆包分析失败:', error);
-=======
-        console.error('❌ 流水线处理失败:', error);
->>>>>>> 8a6d5278b0508b56b771d33c8b2619c39344989e
         throw error;
       }
     }
