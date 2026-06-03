@@ -2303,6 +2303,12 @@
   "recoveryTime": 24
 }`;
 
+        // 添加超时控制器
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60秒超时
+
+        console.log('📤 开始调用豆包API...');
+
         const response = await fetch(DOUBAO_API_URL, {
           method: 'POST',
           headers: {
@@ -2325,8 +2331,12 @@
             ],
             max_tokens: 2048,
             temperature: 0.7
-          })
+          }),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
+        console.log('📥 收到API响应，开始解析...');
 
         updateProgress(60);
 
@@ -2415,7 +2425,15 @@
 
       } catch (error) {
         console.error('❌ 豆包分析失败:', error);
-        throw error;
+        
+        // 提供更友好的错误信息
+        if (error.name === 'AbortError') {
+          throw new Error('请求超时（60秒），请检查网络连接或图片大小');
+        } else if (error.message.includes('Failed to fetch')) {
+          throw new Error('网络连接失败，请检查网络');
+        } else {
+          throw error;
+        }
       }
     }
 
@@ -2479,17 +2497,23 @@
 
         // 只有OCR结果还没显示时才更新提示文字
         if (!ocrResultDisplayed && hintEl) {
-          if (percent < 30) {
-            hintEl.textContent = '正在分析中...';
-          } else if (percent < 60) {
-            hintEl.textContent = '正在分析中...';
+          if (percent < 15) {
+            hintEl.textContent = '🚀 准备分析图片...';
+          } else if (percent < 30) {
+            hintEl.textContent = '📡 正在连接AI模型...';
+          } else if (percent < 50) {
+            hintEl.textContent = '🤖 AI正在分析手表数据...';
+          } else if (percent < 70) {
+            hintEl.textContent = '💪 正在解读运动表现...';
           } else if (percent < 90) {
-            hintEl.textContent = '正在分析中...';
+            hintEl.textContent = '✨ 正在生成个性化建议...';
           } else {
-            hintEl.textContent = '即将完成...';
+            hintEl.textContent = '🎉 即将完成...';
           }
         }
       }
+      
+      console.log('Progress:', percent + '%');
     }
 
     function showLoadingState(message) {
