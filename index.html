@@ -2411,24 +2411,26 @@
         
         updateProgress(20);
         
-        const prompt = `分析这张运动手表截图，只提取截图中清晰可见的核心运动数据。原则：截图上没有的数据不要编造，看不清的字段不提取。
+        const prompt = `分析这张运动手表截图（华为运动健康），精确提取所有可见的运动数据。原则：只提取截图中清晰显示的数据，看不清的字段返回null。
 
-只返回以下JSON（仅包含科学评估必需的指标）：
+按以下JSON格式返回（只返回JSON）：
 {
   "data": {
     "date": "截图中显示的活动日期",
-    "type": "运动类型(跑步/骑行/游泳等)",
-    "distance": 距离(km),
-    "duration": 时长(分钟),
+    "type": "运动类型(跑步/骑行/游泳/步行等)",
+    "distance": 距离(km,精确到小数点后2位)",
+    "duration": 时长(分钟)",
     "pace": 平均配速(分/公里,如6.30),
-    "avgHR": 平均心率,
-    "maxHR": 最高心率,
-    "calories": 消耗卡路里
+    "avgHR": 平均心率(bpm,没有则null),
+    "maxHR": 最高心率(bpm,没有则null),
+    "calories": 消耗卡路里(kcal,没有则null),
+    "cadence": 平均步频(spm,没有则null)",
+    "elevationGain": 爬升高度(米,没有则null)"
   },
   "analysis": {
     "status": "基于数据的客观状态判断",
     "main": "核心发现(1句话)",
-    "hrAnalysis": "心率区间分析"
+    "detail": "详细分析"
   },
   "suggestion": {
     "nextTraining": "下次训练建议",
@@ -2531,6 +2533,40 @@
         
         updateProgress(90);
 
+        // 基础数据提取
+        const distance = parseFloat(structuredData.distance) || 0;
+        const duration = parseFloat(structuredData.duration) || 0;
+        const pace = parseFloat(structuredData.pace) || 0;
+        const type = (structuredData.type || '跑步').toLowerCase();
+
+        // 心率：截图有则用，没有则null（不编造）
+        const avgHR = structuredData.avgHR !== null && structuredData.avgHR !== undefined ? parseInt(structuredData.avgHR) : null;
+        const maxHR = structuredData.maxHR !== null && structuredData.maxHR !== undefined ? parseInt(structuredData.maxHR) : null;
+
+        // 卡路里：截图有则用，没有则用MET公式科学估算
+        let calories = structuredData.calories !== null && structuredData.calories !== undefined ? parseInt(structuredData.calories) : null;
+        if (!calories && distance > 0 && duration > 0) {
+          // MET公式：Calories = MET × 体重(kg) × 时长(h)
+          // 默认按65kg体重估算；MET值根据运动类型和配速确定
+          const weightKg = 65; // 标准参考体重
+          const durationHours = duration / 60;
+          let metValue = 6; // 默认慢跑
+          if (type.includes('跑')) {
+            metValue = pace <= 6 ? 9.8 : pace <= 7 ? 9.0 : pace <= 8 ? 8.3 : pace <= 10 ? 7.5 : 6.5;
+          } else if (type.includes('骑')) {
+            metValue = 7.5;
+          } else if (type.includes('游')) {
+            metValue = 8.0;
+          } else if (type.includes('步') || type.includes('走')) {
+            metValue = 3.5;
+          }
+          calories = Math.round(metValue * weightKg * durationHours);
+        }
+
+        // 步频/爬升：截图有则用，没有则null
+        const cadence = structuredData.cadence !== null && structuredData.cadence !== undefined ? parseInt(structuredData.cadence) : null;
+        const elevationGain = structuredData.elevationGain !== null && structuredData.elevationGain !== undefined ? parseInt(structuredData.elevationGain) : null;
+
         const now = new Date();
         const finalResult = {
           id: now.getTime(),
@@ -2540,13 +2576,13 @@
           image: null,
 
           metrics: {
-            distance: parseFloat(structuredData.distance) || 0,
-            duration: parseFloat(structuredData.duration) || 0,
-            avgPace: parseFloat(structuredData.pace) || 0,
-            avgHR: parseInt(structuredData.avgHR) || 0,
-            maxHR: parseInt(structuredData.maxHR) || 0,
-            calories: parseInt(structuredData.calories) || 0,
-            cadence: parseInt(structuredData.cadence) || null
+            distance: distance,
+            duration: duration,
+            avgPace: pace,
+            avgHR: avgHR,
+            maxHR: maxHR,
+            calories: calories,
+            cadence: cadence
           },
 
           deviceInsights: {
@@ -2554,19 +2590,19 @@
             recoveryHR: structuredData.recoveryHR || null,
             bestPace: structuredData.bestPace || null,
             avgSpeed: structuredData.avgSpeed || null,
-            elevationGain: structuredData.elevationGain || null,
+            elevationGain: elevationGain,
             elevationLoss: structuredData.elevationLoss || null,
             avgStride: structuredData.avgStride || null
           },
 
-          hrZones: generateHRZones(structuredData.duration || 45),
+          hrZones: generateHRZones(duration || 45),
           recoveryTime: parseInt(commentary.recoveryTime) || 24,
 
           aiAnalysis: {
             status: commentary.status || '状态良好',
             main: commentary.analysis?.main || '',
-            detail1: commentary.analysis?.detail1 || '',
-            detail2: commentary.analysis?.detail2 || ''
+            detail1: commentary.analysis?.detail || '',
+            detail2: ''
           },
 
           suggestion: commentary.suggestion || {},
@@ -3100,8 +3136,8 @@
       if (metricValues.length >= 4) {
         metricValues[0].textContent = `${data.metrics.distance} km`;
         metricValues[1].textContent = formatDuration(data.metrics.duration);
-        metricValues[2].textContent = `${data.metrics.avgHR} bpm`;
-        metricValues[3].textContent = `${data.metrics.maxHR} bpm`;
+        metricValues[2].textContent = data.metrics.avgHR ? `${data.metrics.avgHR} bpm` : '--';
+        metricValues[3].textContent = data.metrics.maxHR ? `${data.metrics.maxHR} bpm` : '--';
       }
       
       // 更新AI分析
@@ -3218,7 +3254,7 @@
         
         // 始终使用截图中识别出的真实日期
         const dateLabel = formatDateLabel(activity.date);
-        const statusColor = activity.metrics.avgHR < 150 ? 'var(--recovery)' : 'var(--training)';
+        const statusColor = (activity.metrics.avgHR && activity.metrics.avgHR < 150) ? 'var(--recovery)' : 'var(--training)';
         
         item.innerHTML = `
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
