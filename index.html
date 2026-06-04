@@ -2336,7 +2336,7 @@
     
     // ===== 图片快速压缩函数（针对AI视觉分析优化） =====
     // 目标：快速压缩到较小尺寸，减少网络传输时间
-    async function compressImageForAI(base64Image, targetSizeKB = 500) {
+    async function compressImageForAI(base64Image, targetSizeKB = 200) {
       const targetBytes = targetSizeKB * 1024;
       
       // 如果已经足够小，直接返回
@@ -2350,7 +2350,7 @@
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-          const maxDimension = 1200; // 最大尺寸
+          const maxDimension = 800; // 最大尺寸（优化：更小=更快）
           let width = img.width;
           let height = img.height;
           
@@ -2415,41 +2415,8 @@
         
         updateProgress(20);
         
-        const prompt = `你是一位专业的跑步运动教练和数据分析专家。请分析这张运动手表截图，提取数据并给出分析。
-
-请按以下 JSON 格式返回（只返回 JSON，不要有其他文字）：
-{
-  "valid": true,
-  "data": {
-    "date": "日期（格式：YYYY-MM-DD）",
-    "type": "运动类型（跑步/骑行/游泳等）",
-    "distance": 距离（公里，数字）,
-    "duration": 时长（分钟，数字）,
-    "pace": 平均配速（分钟/公里，数字）,
-    "avgHR": 平均心率（bpm，数字）,
-    "maxHR": 最高心率（bpm，数字）,
-    "calories": 卡路里（kcal，数字）,
-    "vo2max": 最大摄氧量（ml/kg/min，数字或null）,
-    "recoveryHR": 恢复心率（bpm，数字或null）,
-    "bestPace": 最佳配速（分钟/公里，数字或null）,
-    "avgSpeed": 平均速度（km/h，数字或null）,
-    "elevationGain": 爬升高度（米，数字或null）,
-    "cadence": 步频（spm，数字或null）,
-    "avgStride": 平均步幅（米，数字或null）
-  },
-  "analysis": {
-    "status": "状态描述（如：状态良好/强度适中/疲劳等）",
-    "main": "主要分析结论",
-    "detail1": "分析详情1（关于配速/心率）",
-    "detail2": "分析详情2（关于体能/建议）"
-  },
-  "suggestion": {
-    "nextTraining": "下次训练建议",
-    "recoveryAdvice": "恢复建议",
-    "longTermDirection": "长期方向"
-  },
-  "recoveryTime": 24
-}`;
+        const prompt = `分析运动手表截图，返回JSON（仅JSON）：
+{"data":{"date":"YYYY-MM-DD","type":"跑步","distance":公里,"duration":分钟,"pace":分/公里,"avgHR":bpm,"maxHR":bpm,"calories":kcal},"analysis":{"status":"状态","main":"结论","detail1":"配速心率分析"},"suggestion":{"nextTraining":"下次训练","recoveryAdvice":"恢复建议"},"recoveryTime":24}`;
 
         // 添加超时控制器
         const controller = new AbortController();
@@ -2494,8 +2461,8 @@
                 ]
               }
             ],
-            max_tokens: 1024, // 优化：减少响应长度
-            temperature: 0.3, // 优化：降低随机性，加快响应
+            max_tokens: 512, // 优化：最小化输出
+            temperature: 0.1, // 优化：最低随机性=最快
             stream: false
           }),
           signal: controller.signal
@@ -2757,45 +2724,26 @@
         
         // 显示星星爆炸动效
         showStarBurstAndPhilosophy(async () => {
-          // 动效完成后调用真实 AI 分析
           showLoadingState('🤖 AI 正在分析你的数据...');
           
           try {
-            // 先并行尝试：真实AI分析 + 快速超时
-            const realAnalysisPromise = analyzeActivityWithPipeline(imageBase64);
-            const timeoutPromise = new Promise((_, reject) => {
-              setTimeout(() => reject(new Error('timeout')), 15000); // 15秒快速超时
-            });
-            
-            // 先尝试快速完成
-            try {
-              currentActivityData = await Promise.race([realAnalysisPromise, timeoutPromise]);
-              console.log('✅ AI 快速分析完成:', currentActivityData);
-            } catch (fastError) {
-              // 快速超时，使用降级方案，但在后台继续等待真实结果
-              console.log('⏱️ 快速超时，启用降级方案');
-              currentActivityData = generateFallbackData();
-              
-              // 后台继续尝试真实分析
-              realAnalysisPromise.then(realResult => {
-                console.log('✨ 后台真实分析完成，更新数据');
-                currentActivityData = realResult;
-                saveActivity(realResult);
-                updateRecentActivities();
-                // 如果用户还在详情页，更新数据
-                if (document.getElementById('page-activity-detail').classList.contains('active')) {
-                  updateActivityDetailPage(realResult);
-                }
-                showToast('✨ 真实AI分析已完成，数据已更新', 'success');
-              }).catch(e => console.log('后台分析也失败了', e));
-            }
-            
+            currentActivityData = await analyzeActivityWithPipeline(imageBase64);
+            console.log('✅ AI 分析完成:', currentActivityData);
           } catch (error) {
-            console.error('❌ 分析失败，使用降级方案:', error);
-            currentActivityData = generateFallbackData();
+            console.error('❌ 分析失败:', error);
+
+            let errorMsg = error.message || '未知错误';
+            if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
+              errorMsg = '网络连接失败，请检查网络';
+            } else if (errorMsg.includes('timeout') || errorMsg.includes('AbortError')) {
+              errorMsg = '分析超时，请稍后重试（图片可能太大）';
+            }
+
+            showToast(`❌ ${errorMsg}`, 'error');
+            closePhilosophyOverlay();
+            return;
           }
           
-          // 跳转到详情页并更新数据（即使是降级数据也要展示）
           closePhilosophyOverlay();
           navigateTo('activity-detail');
           updateActivityDetailPage(currentActivityData);
@@ -2807,11 +2755,7 @@
           updateRecentActivities();
           
           // 显示完成提示
-          if (currentActivityData.isRealAI) {
-            showToast('✨ 分析完成！', 'success');
-          } else {
-            showToast('⚠️ 使用了离线分析模式', 'warning');
-          }
+          showToast('✨ 分析完成！', 'success');
         });
       };
       
