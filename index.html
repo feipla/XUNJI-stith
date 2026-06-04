@@ -3293,10 +3293,10 @@
     }
     
     // 格式化日期标签
+    // 直接使用图片提取的原始日期，不做格式转换
     function formatDateLabel(dateStr) {
-      const date = new Date(dateStr);
-      const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-      return `${days[date.getDay()]}${date.getDate()}日`;
+      if (!dateStr) return '未知日期';
+      return dateStr;
     }
     
     // 更新生命树统计数据
