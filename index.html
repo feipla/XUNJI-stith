@@ -2527,23 +2527,11 @@
           recoveryTime: resultJson.recoveryTime || 24
         };
 
-        const now = new Date();
-
         // 阶段3: 数据解析与处理
         perfLog.parseTime = Date.now() - apiStart - perfLog.apiTime;
         console.log('📝 [性能] 数据解析完成 - 耗时:', perfLog.parseTime + 'ms');
         
         updateProgress(90);
-
-        const structuredData = resultJson.data || {};
-        const commentary = {
-          status: resultJson.analysis?.status || '状态良好',
-          analysis: resultJson.analysis || { main: '', detail1: '', detail2: '' },
-          suggestion: resultJson.suggestion || {},
-          recoveryTime: resultJson.recoveryTime || 24
-        };
-
-        const now = new Date();
 
         const finalResult = {
           id: now.getTime(),
