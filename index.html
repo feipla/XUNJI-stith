@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>循迹</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght=500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
@@ -108,7 +105,7 @@
     .btn-primary {
       background: linear-gradient(135deg, #FF5733, #FF7043);
       color: white;
-      font-family: 'Hanken Grotesk', sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       font-weight: 600;
       font-size: 15px;
       padding: 16px 24px;
@@ -130,11 +127,11 @@
     }
     
     .font-display {
-      font-family: 'Hanken Grotesk', sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     }
     
     .font-mono {
-      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
     }
     
     .header {
@@ -242,7 +239,7 @@
     }
     
     .gauge-value {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 42px;
       font-weight: 600;
       color: var(--on-surface);
@@ -250,7 +247,7 @@
     }
     
     .gauge-label {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 13px;
       font-weight: 500;
       color: var(--recovery);
@@ -277,7 +274,7 @@
     }
     
     .status-badge {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
@@ -310,7 +307,7 @@
     }
     
     .metric-label {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 10px;
       text-transform: uppercase;
       color: var(--outline);
@@ -318,7 +315,7 @@
     }
     
     .metric-value {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 20px;
       font-weight: 600;
       letter-spacing: -0.05em;
@@ -355,7 +352,7 @@
     }
     
     .badge-name {
-      font-family: 'Hanken Grotesk', sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       font-size: 11px;
       font-weight: 500;
     }
@@ -452,7 +449,7 @@
     }
     
     .hr-zone-label {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 11px;
       color: var(--outline);
       width: 24px;
@@ -476,7 +473,7 @@
     }
     
     .hr-zone-time {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 11px;
       color: var(--outline);
       width: 48px;
@@ -513,7 +510,7 @@
       flex: 1;
       padding: 8px 16px;
       border-radius: 999px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -581,7 +578,7 @@
     }
     
     .screenshot-tag {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 11px;
       color: rgba(255,255,255,0.7);
       background: rgba(0,0,0,0.4);
@@ -624,7 +621,7 @@
     }
     
     .suggestion-title {
-      font-family: 'Hanken Grotesk', sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       font-size: 14px;
       font-weight: 600;
       color: var(--secondary);
@@ -645,14 +642,14 @@
     }
     
     .stat-value {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 14px;
       font-weight: 600;
       color: var(--on-surface);
     }
     
     .stat-label {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 9px;
       color: var(--outline);
       text-transform: uppercase;
@@ -734,7 +731,7 @@
     }
     
     .milestone-type {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 10px;
       color: var(--outline);
       text-transform: uppercase;
@@ -743,7 +740,7 @@
     }
     
     .milestone-title {
-      font-family: 'Hanken Grotesk', sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       font-size: 14px;
       font-weight: 500;
       color: var(--on-surface);
@@ -768,7 +765,7 @@
       flex: 1;
       padding: 8px 16px;
       border-radius: 999px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -830,7 +827,7 @@
     }
     
     .menu-title {
-      font-family: 'Hanken Grotesk', sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       font-size: 14px;
       font-weight: 500;
       color: var(--on-surface);
@@ -951,7 +948,7 @@
     }
 
     .philosophy-text {
-      font-family: 'Hanken Grotesk', sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       font-size: 18px;
       line-height: 1.8;
       color: var(--on-surface);
@@ -976,7 +973,7 @@
 
     .philosophy-hint {
       margin-top: 32px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
       font-size: 11px;
       color: var(--outline);
       text-transform: uppercase;
@@ -2800,7 +2797,7 @@
         transform: translateX(-50%);
         padding: 14px 28px;
         border-radius: 12px;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
         font-size: 13px;
         z-index: 10000;
         max-width: 90vw;
