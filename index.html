@@ -2411,30 +2411,29 @@
         
         updateProgress(20);
         
-        const prompt = `仔细观察这张运动手表截图，精确提取所有运动数据。注意：心率、配速、步频等数字必须准确读取，不要猜测。
+        const prompt = `分析这张运动手表截图，只提取截图中清晰可见的核心运动数据。原则：截图上没有的数据不要编造，看不清的字段不提取。
 
-严格按以下JSON格式返回（只返回JSON）：
+只返回以下JSON（仅包含科学评估必需的指标）：
 {
   "data": {
-    "date": "日期",
-    "type": "跑步",
-    "distance": 距离公里数(精确到小数点后2位),
-    "duration": 总时长分钟数(精确),
-    "pace": 平均配速分/公里(格式如17.43),
-    "avgHR": 平均心率整数,
-    "maxHR": 最高心率整数,
-    "calories": 卡路里整数
+    "date": "截图中显示的活动日期",
+    "type": "运动类型(跑步/骑行/游泳等)",
+    "distance": 距离(km),
+    "duration": 时长(分钟),
+    "pace": 平均配速(分/公里,如6.30),
+    "avgHR": 平均心率,
+    "maxHR": 最高心率,
+    "calories": 消耗卡路里
   },
   "analysis": {
-    "status": "状态描述",
-    "main": "主要分析结论",
-    "detail1": "配速和心率分析"
+    "status": "基于数据的客观状态判断",
+    "main": "核心发现(1句话)",
+    "hrAnalysis": "心率区间分析"
   },
   "suggestion": {
     "nextTraining": "下次训练建议",
     "recoveryAdvice": "恢复建议"
-  },
-  "recoveryTime": 24
+  }
 }`;
 
         // 添加超时控制器
@@ -3217,8 +3216,8 @@
         item.className = 'surface-card activity-item';
         item.onclick = () => viewActivityDetail(activity);
         
-        const isToday = isSameDay(new Date(activity.timestamp), new Date());
-        const dateLabel = isToday ? '今天' : formatDateLabel(activity.date);
+        // 始终使用截图中识别出的真实日期
+        const dateLabel = formatDateLabel(activity.date);
         const statusColor = activity.metrics.avgHR < 150 ? 'var(--recovery)' : 'var(--training)';
         
         item.innerHTML = `
