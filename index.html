@@ -2333,7 +2333,7 @@
     
     // ===== 图片快速压缩函数（针对AI视觉分析优化） =====
     // 目标：快速压缩到较小尺寸，减少网络传输时间
-    async function compressImageForAI(base64Image, targetSizeKB = 350) {
+    async function compressImageForAI(base64Image, targetSizeKB = 800) {
       const targetBytes = targetSizeKB * 1024;
       
       // 如果已经足够小，直接返回
@@ -2342,16 +2342,15 @@
         return base64Image;
       }
 
-      console.log('⚡ 快速压缩图片:', Math.round(base64Image.length / 1024), 'KB → 目标:', targetSizeKB, 'KB');
+      console.log('⚡ 压缩图片:', Math.round(base64Image.length / 1024), 'KB → 目标:', targetSizeKB, 'KB');
 
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-          const maxDimension = 1000; // 最大尺寸（平衡清晰度和速度）
+          const maxDimension = 1500; // 保证手表数字清晰可读
           let width = img.width;
           let height = img.height;
           
-          // 快速调整尺寸
           if (width > maxDimension || height > maxDimension) {
             const ratio = Math.min(maxDimension / width, maxDimension / height);
             width = Math.floor(width * ratio);
@@ -2364,13 +2363,13 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // 快速压缩，质量设为0.7
-          let quality = 0.7;
+          // 从高质量开始，逐步降低
+          let quality = 0.85;
           let result = canvas.toDataURL('image/jpeg', quality);
           
-          // 如果还是太大，进一步压缩
-          if (result.length > targetBytes) {
-            quality = 0.5;
+          // 逐步压缩，不要一步到位
+          while (result.length > targetBytes && quality > 0.3) {
+            quality -= 0.1;
             result = canvas.toDataURL('image/jpeg', quality);
           }
 
@@ -2412,24 +2411,24 @@
         
         updateProgress(20);
         
-        const prompt = `分析这张运动手表运动截图，提取所有可见的运动数据并给出简短分析。
+        const prompt = `仔细观察这张运动手表截图，精确提取所有运动数据。注意：心率、配速、步频等数字必须准确读取，不要猜测。
 
-严格按以下JSON格式返回（只返回JSON，不要其他文字）：
+严格按以下JSON格式返回（只返回JSON）：
 {
   "data": {
     "date": "日期",
     "type": "跑步",
-    "distance": 距离公里数,
-    "duration": 时长分钟数,
-    "pace": 平均配速(分/公里),
-    "avgHR": 平均心率,
-    "maxHR": 最高心率,
-    "calories": 卡路里
+    "distance": 距离公里数(精确到小数点后2位),
+    "duration": 总时长分钟数(精确),
+    "pace": 平均配速分/公里(格式如17.43),
+    "avgHR": 平均心率整数,
+    "maxHR": 最高心率整数,
+    "calories": 卡路里整数
   },
   "analysis": {
     "status": "状态描述",
-    "main": "主要分析结论(一句话)",
-    "detail1": "配速心率详情"
+    "main": "主要分析结论",
+    "detail1": "配速和心率分析"
   },
   "suggestion": {
     "nextTraining": "下次训练建议",
