@@ -2336,7 +2336,7 @@
     
     // ===== 图片快速压缩函数（针对AI视觉分析优化） =====
     // 目标：快速压缩到较小尺寸，减少网络传输时间
-    async function compressImageForAI(base64Image, targetSizeKB = 200) {
+    async function compressImageForAI(base64Image, targetSizeKB = 350) {
       const targetBytes = targetSizeKB * 1024;
       
       // 如果已经足够小，直接返回
@@ -2350,7 +2350,7 @@
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-          const maxDimension = 800; // 最大尺寸（优化：更小=更快）
+          const maxDimension = 1000; // 最大尺寸（平衡清晰度和速度）
           let width = img.width;
           let height = img.height;
           
@@ -2415,8 +2415,31 @@
         
         updateProgress(20);
         
-        const prompt = `分析运动手表截图，返回JSON（仅JSON）：
-{"data":{"date":"YYYY-MM-DD","type":"跑步","distance":公里,"duration":分钟,"pace":分/公里,"avgHR":bpm,"maxHR":bpm,"calories":kcal},"analysis":{"status":"状态","main":"结论","detail1":"配速心率分析"},"suggestion":{"nextTraining":"下次训练","recoveryAdvice":"恢复建议"},"recoveryTime":24}`;
+        const prompt = `分析这张运动手表运动截图，提取所有可见的运动数据并给出简短分析。
+
+严格按以下JSON格式返回（只返回JSON，不要其他文字）：
+{
+  "data": {
+    "date": "日期",
+    "type": "跑步",
+    "distance": 距离公里数,
+    "duration": 时长分钟数,
+    "pace": 平均配速(分/公里),
+    "avgHR": 平均心率,
+    "maxHR": 最高心率,
+    "calories": 卡路里
+  },
+  "analysis": {
+    "status": "状态描述",
+    "main": "主要分析结论(一句话)",
+    "detail1": "配速心率详情"
+  },
+  "suggestion": {
+    "nextTraining": "下次训练建议",
+    "recoveryAdvice": "恢复建议"
+  },
+  "recoveryTime": 24
+}`;
 
         // 添加超时控制器
         const controller = new AbortController();
@@ -2461,8 +2484,8 @@
                 ]
               }
             ],
-            max_tokens: 512, // 优化：最小化输出
-            temperature: 0.1, // 优化：最低随机性=最快
+            max_tokens: 768, // 平衡输出完整性和速度
+            temperature: 0.2, // 低随机性，保证输出稳定
             stream: false
           }),
           signal: controller.signal
