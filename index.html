@@ -2380,6 +2380,38 @@
       });
     }
     
+    // 裁剪手表截图：保留上60%核心数据区域，去掉曲线图和底部装饰
+    function cropWatchScreenshot(base64Image) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const w = img.width;
+          const h = img.height;
+
+          // 裁剪参数：保留上部 60%，左右各去 5% 边距
+          const topRatio = 0.0;
+          const bottomRatio = 0.60;
+          const sideMarginRatio = 0.05;
+
+          const cropX = Math.floor(w * sideMarginRatio);
+          const cropY = Math.floor(h * topRatio);
+          const cropW = Math.floor(w * (1 - 2 * sideMarginRatio));
+          const cropH = Math.floor(h * (bottomRatio - topRatio));
+
+          const canvas = document.createElement('canvas');
+          canvas.width = cropW;
+          canvas.height = cropH;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+          const cropped = canvas.toDataURL('image/jpeg', 0.95);
+          console.log(`✂️ [裁剪] 原始 ${w}×${h} → 裁剪后 ${cropW}×${cropH}, 大小: ${Math.round(cropped.length / 1024)}KB`);
+          resolve(cropped);
+        };
+        img.src = base64Image;
+      });
+    }
+    
     // ===== 主流程：豆包视觉多模态分析 =====
 
     async function analyzeActivityWithPipeline(imageBase64) {
@@ -2395,14 +2427,19 @@
 
         updateProgress(10);
 
-        // 阶段1: 图片压缩
+        // 阶段0: 图片裁剪（去掉曲线图/底部装饰，只保留核心数据区域）
         perfLog.originalSizeKB = Math.round(imageBase64.length / 1024);
         console.log('📷 [性能] 原始图片大小:', perfLog.originalSizeKB, 'KB');
         
+        const cropStart = Date.now();
+        const croppedImage = await cropWatchScreenshot(imageBase64);
+        perfLog.cropTime = Date.now() - cropStart;
+        
+        // 阶段1: 图片压缩
         const compressStart = Date.now();
         console.log('📷 [性能] 开始压缩图片...');
         
-        const compressedImage = await compressImageForAI(imageBase64);
+        const compressedImage = await compressImageForAI(croppedImage);
         const base64Data = compressedImage.split(',')[1];
         
         perfLog.compressTime = Date.now() - compressStart;
@@ -2622,6 +2659,7 @@
         console.log('🗜️ 压缩后大小:', perfLog.compressedSizeKB, 'KB');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log('⏱️  各阶段耗时:');
+        console.log('   ✂️ 图片裁剪:', perfLog.cropTime, 'ms', `(${Math.round(perfLog.cropTime / perfLog.totalTime * 100)}%)`);
         console.log('   📷 图片压缩:', perfLog.compressTime, 'ms', `(${Math.round(perfLog.compressTime / perfLog.totalTime * 100)}%)`);
         console.log('   🤖 AI模型调用:', perfLog.apiTime, 'ms', `(${Math.round(perfLog.apiTime / perfLog.totalTime * 100)}%)`);
         console.log('   📝 数据处理:', perfLog.parseTime, 'ms', `(${Math.round(perfLog.parseTime / perfLog.totalTime * 100)}%)`);
